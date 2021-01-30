@@ -24,13 +24,15 @@ public class XMLMapperBuilder {
         Element rootElement = document.getRootElement();
 
         String namespace = rootElement.attributeValue("namespace");
-        List<Element> selectElement = rootElement.selectNodes("//select");
-        selectElement.forEach(e->{
+        List<Element> sqlElements = rootElement.elements();
+        sqlElements.forEach(e->{
+            String sqlType = e.getName();
             String id = e.attributeValue("id");
             String resultType = e.attributeValue("resultType");
             String parameterType = e.attributeValue("parameterType");
             String sql = e.getTextTrim();
             MappedStatement mappedStatement = new MappedStatement();
+            mappedStatement.setSqlType(sqlType);
             mappedStatement.setId(id);
             mappedStatement.setParameterType(parameterType);
             mappedStatement.setResultType(resultType);

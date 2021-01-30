@@ -1,7 +1,8 @@
 package com.lagou.pojo;
 
 public class MappedStatement {
-
+    //sql类型（select、update、insert、delete）
+    private String sqlType;
     //id标识
     private String id;
     //返回值类型
@@ -10,6 +11,14 @@ public class MappedStatement {
     private String parameterType;
     //sql语句
     private String sql;
+
+    public String getSqlType() {
+        return sqlType;
+    }
+
+    public void setSqlType(String sqlType) {
+        this.sqlType = sqlType;
+    }
 
     public String getId() {
         return id;

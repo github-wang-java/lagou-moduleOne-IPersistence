@@ -1,6 +1,7 @@
 package com.lagou.sqlSession;
 
 import com.lagou.pojo.Configuration;
+import com.lagou.pojo.MappedStatement;
 
 import java.beans.Expression;
 import java.lang.reflect.*;
@@ -36,6 +37,24 @@ public class DefaultSqlSession implements SqlSession {
     }
 
     @Override
+    public void insert(String statementId, Object... params) throws Exception {
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        simpleExecutor.query(configuration,configuration.getMappedStatementMap().get(statementId),params);
+    }
+
+    @Override
+    public void delete(String statementId, Object... params) throws Exception {
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        simpleExecutor.query(configuration,configuration.getMappedStatementMap().get(statementId),params);
+    }
+
+    @Override
+    public void update(String statementId, Object... params) throws Exception {
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        simpleExecutor.query(configuration,configuration.getMappedStatementMap().get(statementId),params);
+    }
+
+    @Override
     public <T> T getMapper(Class<?> mapperClass) {
         //使用JDK动态代理为DAO生成代理对象
         Object proxyInstance = Proxy.newProxyInstance(DefaultSqlSession.class.getClassLoader(), new Class[]{mapperClass}, new InvocationHandler() {
@@ -47,24 +66,60 @@ public class DefaultSqlSession implements SqlSession {
              */
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
                 //获取参数1：statementId：namespace.id
                 String name = method.getName();
                 String className = method.getDeclaringClass().getName();
 
                 String statementId = className + "." + name;
 
+                MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
                 //获取参数2：params：args
-
-                //获取被调用方法的返回值
-                Type returnType = method.getGenericReturnType();
-                //判断该方法的返回值类型是否进行了 泛型类型参数化（即返回值是否包含泛型，如：List<T>）
-                if (returnType instanceof ParameterizedType){
-                    return selectList(statementId,args);
+                Object obj = new Object();
+                switch (mappedStatement.getSqlType()){
+                    case "select":
+                        obj = invokeSelect(statementId,method,args);
+                        break;
+                    case "update":
+                        obj = invokeUpdate(statementId,args);
+                        break;
+                    case "insert":
+                        obj = invokeInsert(statementId,args);
+                        break;
+                    case "delete":
+                        obj = invokeDelete(statementId,args);
+                        break;
+                    default:
+                        throw new RuntimeException("unknow sql type");
                 }
-
-                return selectOne(statementId,args);
+                return obj;
             }
         });
         return (T) proxyInstance;
+    }
+
+    private Object invokeSelect(String statementId,Method method,Object[] args) throws Exception {
+        //获取被调用方法的返回值
+        Type returnType = method.getGenericReturnType();
+        //判断该方法的返回值类型是否进行了 泛型类型参数化（即返回值是否包含泛型，如：List<T>）
+        if (returnType instanceof ParameterizedType){
+            return selectList(statementId,args);
+        }
+        return selectOne(statementId,args);
+    }
+
+    private Object invokeUpdate(String statementId,Object[] args) throws Exception {
+        update(statementId, args);
+        return null;
+    }
+
+    private Object invokeInsert(String statementId,Object[] args) throws Exception {
+        insert(statementId, args);
+        return null;
+    }
+
+    private Object invokeDelete(String statementId,Object[] args) throws Exception {
+        delete(statementId, args);
+        return null;
     }
 }

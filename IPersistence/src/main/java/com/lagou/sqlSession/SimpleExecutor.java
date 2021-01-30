@@ -56,8 +56,11 @@ public class SimpleExecutor implements Executor {
         }
 
         //5、执行sql
+        if (!"select".equals(mappedStatement.getSqlType())){
+            preparedStatement.execute();
+            return null;
+        }
         ResultSet resultSet = preparedStatement.executeQuery();
-
         String resultType = mappedStatement.getResultType();
         Class resultClass = getClassType(resultType);
 

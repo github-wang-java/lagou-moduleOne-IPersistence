@@ -1,0 +1,28 @@
+<mapper namespace="com.lagou.dao.IUserDao">
+
+    <!--sql的唯一标识用namespace.id来表示-->
+    <select id="findAll" resultType="com.lagou.pojo.RpUser">
+        select * from user
+    </select>
+
+    <!--
+        RpUser user = new RpUser();
+
+    -->
+    <select id="findByCondition" parameterType="com.lagou.pojo.RpUser" resultType="com.lagou.pojo.RpUser">
+        select * from user where id = #{id} and name = #{name}
+    </select>
+
+    <update id="update" parameterType="com.lagou.pojo.RpUser">
+        update user set name = #{name} where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="com.lagou.pojo.RpUser">
+        delete from user where id = #{id}
+    </delete>
+
+    <insert id="save" parameterType="com.lagou.pojo.RpUser">
+        insert into user (name) values (#{name})
+    </insert>
+
+</mapper>
